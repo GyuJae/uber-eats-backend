@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  email         String       @unique
+  password      String
+  role          Role
+  restaurants   Restaurant[]
+  driver_orders Order[]      @relation(name: "order_driver")
+  client_orders Order[]      @relation(name: "order_client")
+}
+
+enum Role {
+  Client
+  Owner
+  Delivery
+}
+
+model Restaurant {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  name       String
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId    Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  address    String
+  coverImg   String
+  dishes     Dish[]
+  orders     Order[]
+}
+
+model Category {
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  name        String       @unique
+  coverImg    String?
+  restaurants Restaurant[]
+}
+
+model Dish {
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  name                String
+  price               Int
+  photo               String
+  description         String                @db.MediumText
+  options             DishOption[]
+  orderItems          OrderItem[]
+  selectOptionChoices SelectOptionChoices[]
+  restaurant          Restaurant            @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId        Int
+
+
+  @@unique([id, restaurantId])
+}
+
+model DishOption {
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  name                String
+  choices             DishOptionChoice[]
+  selectOptionChoices SelectOptionChoices[]
+  dish                Dish                  @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  dishId              Int
+
+  @@unique([id, dishId])
+}
+
+model DishOptionChoice {
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  dishOption          DishOption            @relation(fields: [dishOptionId], references: [id], onDelete: Cascade)
+  dishOptionId        Int
+  selectOptionChoices SelectOptionChoices[]
+  name                String
+  extra               Int?
+
+  @@unique([id, dishOptionId])
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  driver       User?       @relation(name: "order_driver", fields: [driverId], references: [id], onDelete: Cascade)
+  driverId     Int?
+  client       User        @relation(name: "order_client", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     Int
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId Int
+  orderItems   OrderItem[]
+  total        Int?
+  status       OrderStatus @default(Pending)
+}
+
+enum OrderStatus {
+  Pending
+  Cooking
+  Cooked
+  PickedUp
+  Delivered
+}
+
+model OrderItem {
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  order               Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId             Int
+  dish                Dish                  @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  dishId              Int
+  selectOptionChoices SelectOptionChoices[]
+}
+
+model SelectOptionChoices {
+  id        Int              @id @default(autoincrement())
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  dish      Dish             @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  dishId    Int
+  option    DishOption       @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId  Int
+  choice    DishOptionChoice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  choiceId  Int
+  orderItem OrderItem        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int
+
+  @@unique([dishId, optionId, choiceId, orderId])
+}

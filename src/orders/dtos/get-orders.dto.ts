@@ -18,6 +18,6 @@ export class OrdersWithRestaurant extends OrderEntity {
 
 @ObjectType()
 export class GetOrdersOutput extends CoreOutput {
-  @Field(() => [OrderEntity], { nullable: true })
+  @Field(() => [OrdersWithRestaurant], { nullable: true })
   orders?: OrdersWithRestaurant[];
 }

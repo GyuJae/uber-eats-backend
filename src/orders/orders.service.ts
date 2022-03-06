@@ -152,6 +152,7 @@ export class OrdersService {
           },
           include: {
             restaurant: true,
+            client: true,
           },
         });
         return {
@@ -168,6 +169,7 @@ export class OrdersService {
           },
           include: {
             restaurant: true,
+            client: true,
           },
         });
         return {
@@ -181,6 +183,7 @@ export class OrdersService {
           },
           include: {
             restaurant: true,
+            client: true,
           },
         });
         return {

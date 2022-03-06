@@ -13,7 +13,7 @@ import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { PubSub } from 'graphql-subscriptions';
-import { TakeOrderInput, TakeOrderOutput } from './dtos/take.order.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -117,12 +117,9 @@ export class OrdersService {
           id: order.id,
         },
         include: {
-          restaurant: {
-            select: {
-              ownerId: true,
-            },
-          },
+          restaurant: true,
           orderItems: true,
+          client: true,
         },
       });
       await this.pubSub.publish(NEW_PENDING_ORDER, {

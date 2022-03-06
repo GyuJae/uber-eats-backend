@@ -16,7 +16,8 @@ import {
   PUB_SUB,
 } from 'src/common/common.constants';
 import { UpdateOrderInput } from './dtos/update-order.dto';
-import { TakeOrderInput, TakeOrderOutput } from './dtos/take.order.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
+import { PendingOrderOutput } from './dtos/pending-order.dto';
 
 @Resolver(() => OrderEntity)
 export class OrdersResolver {
@@ -70,7 +71,7 @@ export class OrdersResolver {
     return this.orderService.takeOrder(takeOrderInput, driver);
   }
 
-  @Subscription(() => OrderEntity, {
+  @Subscription(() => PendingOrderOutput, {
     filter: (
       {
         pendingOrders: {

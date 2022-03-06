@@ -2,7 +2,7 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { CoreOutput } from 'src/common/dtos/core-output.dto';
 
 @InputType()
-export class IOptionAndChoice {
+class IOptionAndChoice {
   @Field(() => Int)
   optionId: number;
 
@@ -11,15 +11,21 @@ export class IOptionAndChoice {
 }
 
 @InputType()
-export class CreateOrderInput {
-  @Field(() => Int)
-  restaurantId: number;
-
+class CreateOrderInputList {
   @Field(() => Int)
   dishId: number;
 
   @Field(() => [IOptionAndChoice])
   optionAndChoice: IOptionAndChoice[];
+}
+
+@InputType()
+export class CreateOrderInput {
+  @Field(() => Int)
+  restaurantId: number;
+
+  @Field(() => [CreateOrderInputList])
+  createOrderInputList: CreateOrderInputList[];
 }
 
 @ObjectType()

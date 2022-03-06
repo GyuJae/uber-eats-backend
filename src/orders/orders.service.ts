@@ -12,7 +12,6 @@ import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
-import { OrderEntity } from './entities/order.entity';
 import { PubSub } from 'graphql-subscriptions';
 import { TakeOrderInput, TakeOrderOutput } from './dtos/take.order.dto';
 
@@ -24,7 +23,7 @@ export class OrdersService {
   ) {}
 
   async createOrder(
-    { optionAndChoice, restaurantId, dishId }: CreateOrderInput,
+    { createOrderInputList, restaurantId }: CreateOrderInput,
     client: UserEntity,
   ): Promise<CreateOrderOutput> {
     try {
@@ -42,48 +41,6 @@ export class OrdersService {
           error: 'This restaurant id does not exist.',
         };
       }
-      const dish = await this.prismaService.dish.findUnique({
-        where: {
-          id: dishId,
-        },
-        select: {
-          id: true,
-        },
-      });
-      if (!dish) {
-        return {
-          ok: false,
-          error: 'This dish Id does not exist.',
-        };
-      }
-      const counter = {};
-      for (const { optionId, choiceId } of optionAndChoice) {
-        if (counter.hasOwnProperty(optionId)) {
-          return {
-            ok: false,
-            error: 'option Id no duplicate.',
-          };
-        } else {
-          counter[optionId] = 1;
-        }
-        counter[optionId] = 1;
-        const optionChoice =
-          await this.prismaService.dishOptionChoice.findUnique({
-            where: {
-              id_dishOptionId: {
-                id: choiceId,
-                dishOptionId: optionId,
-              },
-            },
-          });
-
-        if (!optionChoice) {
-          return {
-            ok: false,
-            error: 'This option choice id does not exist.',
-          };
-        }
-      }
 
       const order = await this.prismaService.order.create({
         data: {
@@ -94,21 +51,66 @@ export class OrdersService {
           id: true,
         },
       });
-      await this.prismaService.orderItem.create({
-        data: {
-          orderId: order.id,
-          dishId: dish.id,
-          selectOptionChoices: {
-            createMany: {
-              data: optionAndChoice.map(({ optionId, choiceId }) => ({
-                optionId,
-                choiceId,
-                dishId: dish.id,
-              })),
+
+      for (const { dishId, optionAndChoice } of createOrderInputList) {
+        const dish = await this.prismaService.dish.findUnique({
+          where: {
+            id: dishId,
+          },
+          select: {
+            id: true,
+          },
+        });
+        if (!dish) {
+          return {
+            ok: false,
+            error: 'This dish Id does not exist.',
+          };
+        }
+        const counter = {};
+        for (const { optionId, choiceId } of optionAndChoice) {
+          if (counter.hasOwnProperty(optionId)) {
+            return {
+              ok: false,
+              error: 'option Id no duplicate.',
+            };
+          } else {
+            counter[optionId] = 1;
+          }
+          counter[optionId] = 1;
+          const optionChoice =
+            await this.prismaService.dishOptionChoice.findUnique({
+              where: {
+                id_dishOptionId: {
+                  id: choiceId,
+                  dishOptionId: optionId,
+                },
+              },
+            });
+
+          if (!optionChoice) {
+            return {
+              ok: false,
+              error: 'This option choice id does not exist.',
+            };
+          }
+        }
+        await this.prismaService.orderItem.create({
+          data: {
+            orderId: order.id,
+            dishId: dish.id,
+            selectOptionChoices: {
+              createMany: {
+                data: optionAndChoice.map(({ optionId, choiceId }) => ({
+                  optionId,
+                  choiceId,
+                  dishId: dish.id,
+                })),
+              },
             },
           },
-        },
-      });
+        });
+      }
 
       const resultOrder = await this.prismaService.order.findUnique({
         where: {
@@ -143,35 +145,55 @@ export class OrdersService {
     user: UserEntity,
   ): Promise<GetOrdersOutput> {
     try {
-      let orders: OrderEntity[];
       if (user.role === Role.Client) {
-        orders = await this.prismaService.order.findMany({
+        const orders = await this.prismaService.order.findMany({
           where: {
             clientId: user.id,
             ...(status && {
               status,
             }),
           },
+          include: {
+            restaurant: true,
+          },
         });
+        return {
+          ok: true,
+          orders,
+        };
       } else if (user.role === Role.Owner) {
-        orders = await this.prismaService.order.findMany({
+        const orders = await this.prismaService.order.findMany({
           where: {
             restaurant: {
               ownerId: user.id,
             },
             ...(status && { status }),
           },
+          include: {
+            restaurant: true,
+          },
         });
+        return {
+          ok: true,
+          orders,
+        };
       } else if (user.role === Role.Delivery) {
-        orders = await this.prismaService.order.findMany({
+        const orders = await this.prismaService.order.findMany({
           where: {
             driverId: user.id,
           },
+          include: {
+            restaurant: true,
+          },
         });
+        return {
+          ok: true,
+          orders,
+        };
       }
       return {
-        ok: true,
-        orders,
+        ok: false,
+        error: 'no orders',
       };
     } catch (error) {
       return {

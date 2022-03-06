@@ -1,6 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { OrderStatus } from '@prisma/client';
 import { CoreOutput } from 'src/common/dtos/core-output.dto';
+import { RestaurantEntity } from 'src/restaurants/entities/restaurant.entity';
 import { OrderEntity } from '../entities/order.entity';
 
 @InputType()
@@ -10,7 +11,13 @@ export class GetOrdersInput {
 }
 
 @ObjectType()
+export class OrdersWithRestaurant extends OrderEntity {
+  @Field(() => RestaurantEntity)
+  restaurant: RestaurantEntity;
+}
+
+@ObjectType()
 export class GetOrdersOutput extends CoreOutput {
   @Field(() => [OrderEntity], { nullable: true })
-  orders?: OrderEntity[];
+  orders?: OrdersWithRestaurant[];
 }

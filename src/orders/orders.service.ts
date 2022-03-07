@@ -14,6 +14,10 @@ import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { PubSub } from 'graphql-subscriptions';
 import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
+import {
+  GetDetailOrderInput,
+  GetDetailOrderOutput,
+} from './dtos/get-detail-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -238,6 +242,62 @@ export class OrdersService {
         return {
           ok: false,
           error: 'No Authorization.',
+        };
+      }
+      return {
+        ok: true,
+        order,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async getDetailOrder(
+    { orderId }: GetDetailOrderInput,
+    user: UserEntity,
+  ): Promise<GetDetailOrderOutput> {
+    try {
+      const order = await this.prismaService.order.findUnique({
+        where: {
+          id: orderId,
+        },
+        include: {
+          restaurant: {
+            select: {
+              ownerId: true,
+            },
+          },
+          orderItems: {
+            include: {
+              dish: true,
+              selectOptionChoices: {
+                include: {
+                  option: true,
+                  choice: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!order) {
+        return {
+          ok: false,
+          error: 'This order id does not exists.',
+        };
+      }
+      if (
+        order.clientId !== user.id &&
+        order.restaurant.ownerId !== user.id &&
+        order.driverId !== user.id
+      ) {
+        return {
+          ok: false,
+          error: 'No Authorization',
         };
       }
       return {

@@ -18,6 +18,10 @@ import {
 import { UpdateOrderInput } from './dtos/update-order.dto';
 import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 import { PendingOrderOutput } from './dtos/pending-order.dto';
+import {
+  GetDetailOrderInput,
+  GetDetailOrderOutput,
+} from './dtos/get-detail-order.dto';
 
 @Resolver(() => OrderEntity)
 export class OrdersResolver {
@@ -42,6 +46,15 @@ export class OrdersResolver {
     @CurrentUser() user: UserEntity,
   ): Promise<GetOrdersOutput> {
     return this.orderService.getOrders(getOrdersInput, user);
+  }
+
+  @Query(() => GetDetailOrderOutput)
+  @Roles('Any')
+  async getDetailOrder(
+    @Args('input') getDetailOrderInput: GetDetailOrderInput,
+    @CurrentUser() user: UserEntity,
+  ): Promise<GetDetailOrderOutput> {
+    return this.orderService.getDetailOrder(getDetailOrderInput, user);
   }
 
   @Mutation(() => CreateOrderOutput)

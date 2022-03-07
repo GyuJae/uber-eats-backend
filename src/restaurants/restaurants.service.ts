@@ -406,7 +406,7 @@ export class RestaurantsService {
         options.forEach(async (option) => {
           const optionObj = await this.prismaService.dishOption.create({
             data: {
-              name: option.content.name,
+              name: option.optionName,
               dishId: dish.id,
             },
           });
@@ -422,6 +422,7 @@ export class RestaurantsService {
 
       return {
         ok: true,
+        dishId: dish.id,
       };
     } catch (error) {
       return {
@@ -525,7 +526,7 @@ export class RestaurantsService {
         options.forEach(async (option) => {
           const optionObj = await this.prismaService.dishOption.create({
             data: {
-              name: option.content.name,
+              name: option.optionName,
               dishId: dish.id,
             },
           });

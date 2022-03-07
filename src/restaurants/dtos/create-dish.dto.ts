@@ -1,17 +1,6 @@
-import { Field, InputType, ObjectType, PickType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType, PickType } from '@nestjs/graphql';
 import { CoreOutput } from 'src/common/dtos/core-output.dto';
-import {
-  DishOptionChoiceEntity,
-  DishEntity,
-  DishOptionEntity,
-} from '../entities/dish.entity';
-
-@InputType()
-export class DishOptionInput extends PickType(
-  DishOptionEntity,
-  ['name'],
-  InputType,
-) {}
+import { DishOptionChoiceEntity, DishEntity } from '../entities/dish.entity';
 
 @InputType()
 export class DishOptionChoiceInput extends PickType(
@@ -22,8 +11,8 @@ export class DishOptionChoiceInput extends PickType(
 
 @InputType()
 class DishOptionAndChoice {
-  @Field(() => DishOptionInput)
-  content: DishOptionInput;
+  @Field(() => String)
+  optionName: string;
 
   @Field(() => [DishOptionChoiceInput], { nullable: true })
   choices?: DishOptionChoiceInput[];
@@ -40,4 +29,7 @@ export class CreateDishInput extends PickType(
 }
 
 @ObjectType()
-export class CreateDishOutput extends CoreOutput {}
+export class CreateDishOutput extends CoreOutput {
+  @Field(() => Int, { nullable: true })
+  dishId?: number;
+}

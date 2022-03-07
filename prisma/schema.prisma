@@ -130,6 +130,7 @@ model OrderItem {
   dish                Dish                  @relation(fields: [dishId], references: [id], onDelete: Cascade)
   dishId              Int
   selectOptionChoices SelectOptionChoices[]
+  count               Int                   @default(1)
 }
 
 model SelectOptionChoices {

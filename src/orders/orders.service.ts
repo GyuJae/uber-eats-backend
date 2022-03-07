@@ -56,7 +56,7 @@ export class OrdersService {
         },
       });
 
-      for (const { dishId, optionAndChoice } of createOrderInputList) {
+      for (const { dishId, optionAndChoice, count } of createOrderInputList) {
         const dish = await this.prismaService.dish.findUnique({
           where: {
             id: dishId,
@@ -103,6 +103,7 @@ export class OrdersService {
           data: {
             orderId: order.id,
             dishId: dish.id,
+            count,
             selectOptionChoices: {
               createMany: {
                 data: optionAndChoice.map(({ optionId, choiceId }) => ({
@@ -116,16 +117,65 @@ export class OrdersService {
         });
       }
 
-      const resultOrder = await this.prismaService.order.findUnique({
+      const realOrder = await this.prismaService.order.findUnique({
         where: {
           id: order.id,
         },
         include: {
+          orderItems: {
+            include: {
+              dish: {
+                select: {
+                  price: true,
+                },
+              },
+              selectOptionChoices: {
+                include: {
+                  choice: {
+                    select: {
+                      extra: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      let total = 0;
+      realOrder.orderItems.forEach((item) => {
+        total += item.dish.price;
+        item.selectOptionChoices.forEach((option) => {
+          total += option.choice.extra;
+        });
+        total *= item.count;
+      });
+
+      const resultOrder = await this.prismaService.order.update({
+        where: {
+          id: order.id,
+        },
+        data: {
+          total,
+        },
+        include: {
           restaurant: true,
-          orderItems: true,
+          orderItems: {
+            include: {
+              dish: true,
+              selectOptionChoices: {
+                include: {
+                  option: true,
+                  choice: true,
+                },
+              },
+            },
+          },
           client: true,
         },
       });
+
       await this.pubSub.publish(NEW_PENDING_ORDER, {
         pendingOrders: resultOrder,
       });

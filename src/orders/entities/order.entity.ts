@@ -28,6 +28,9 @@ export class SelectOptionChoicesEntity
 @ObjectType()
 export class OrderItemEntity extends CoreEntity implements OrderItem {
   @Field(() => Int)
+  count: number;
+
+  @Field(() => Int)
   orderId: number;
 
   @Field(() => Int)

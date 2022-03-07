@@ -17,6 +17,9 @@ class CreateOrderInputList {
 
   @Field(() => [IOptionAndChoice])
   optionAndChoice: IOptionAndChoice[];
+
+  @Field(() => Int, { nullable: true })
+  count?: number;
 }
 
 @InputType()

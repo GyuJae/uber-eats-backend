@@ -108,6 +108,9 @@ model Order {
   clientId     Int
   restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId Int
+  address      String
+  lat          Float
+  lon          Float
   orderItems   OrderItem[]
   total        Int?
   status       OrderStatus @default(Pending)

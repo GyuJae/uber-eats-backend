@@ -1,4 +1,4 @@
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { CoreOutput } from 'src/common/dtos/core-output.dto';
 
 @InputType()
@@ -26,6 +26,15 @@ class CreateOrderInputList {
 export class CreateOrderInput {
   @Field(() => Int)
   restaurantId: number;
+
+  @Field(() => String)
+  address: string;
+
+  @Field(() => Float)
+  lat: number;
+
+  @Field(() => Float)
+  lon: number;
 
   @Field(() => [CreateOrderInputList])
   createOrderInputList: CreateOrderInputList[];

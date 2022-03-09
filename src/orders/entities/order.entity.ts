@@ -1,4 +1,10 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  Float,
+  Int,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import {
   Order,
   OrderItem,
@@ -39,8 +45,17 @@ export class OrderItemEntity extends CoreEntity implements OrderItem {
 
 @ObjectType()
 export class OrderEntity extends CoreEntity implements Order {
+  @Field(() => String)
+  address: string;
+
   @Field(() => Int, { nullable: true })
   driverId: number | null;
+
+  @Field(() => Float, { nullable: true })
+  lat: number;
+
+  @Field(() => Float, { nullable: true })
+  lon: number;
 
   @Field(() => Int)
   clientId: number;

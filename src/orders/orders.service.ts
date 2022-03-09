@@ -27,7 +27,7 @@ export class OrdersService {
   ) {}
 
   async createOrder(
-    { createOrderInputList, restaurantId }: CreateOrderInput,
+    { address, lat, lon, createOrderInputList, restaurantId }: CreateOrderInput,
     client: UserEntity,
   ): Promise<CreateOrderOutput> {
     try {
@@ -50,6 +50,9 @@ export class OrdersService {
         data: {
           clientId: client.id,
           restaurantId: restaurant.id,
+          address,
+          lat,
+          lon,
         },
         select: {
           id: true,
@@ -207,6 +210,17 @@ export class OrdersService {
           include: {
             restaurant: true,
             client: true,
+            orderItems: {
+              include: {
+                dish: true,
+                selectOptionChoices: {
+                  include: {
+                    option: true,
+                    choice: true,
+                  },
+                },
+              },
+            },
           },
         });
         return {
@@ -224,6 +238,17 @@ export class OrdersService {
           include: {
             restaurant: true,
             client: true,
+            orderItems: {
+              include: {
+                dish: true,
+                selectOptionChoices: {
+                  include: {
+                    option: true,
+                    choice: true,
+                  },
+                },
+              },
+            },
           },
         });
         return {
@@ -238,6 +263,17 @@ export class OrdersService {
           include: {
             restaurant: true,
             client: true,
+            orderItems: {
+              include: {
+                dish: true,
+                selectOptionChoices: {
+                  include: {
+                    option: true,
+                    choice: true,
+                  },
+                },
+              },
+            },
           },
         });
         return {

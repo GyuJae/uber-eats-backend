@@ -373,12 +373,7 @@ export class OrdersService {
           error: 'No edit pending',
         };
       }
-      if (user.role === Role.Client) {
-        return {
-          ok: false,
-          error: 'Your role client is no authorzation',
-        };
-      }
+
       const order = await this.prismaService.order.findUnique({
         where: {
           id: orderId,
@@ -399,7 +394,9 @@ export class OrdersService {
       }
       if (
         user.role === Role.Delivery &&
-        (status === OrderStatus.Cooked || status === OrderStatus.Cooking)
+        (status === OrderStatus.Cooked ||
+          status === OrderStatus.Cooking ||
+          status === OrderStatus.Reject)
       ) {
         return {
           ok: false,

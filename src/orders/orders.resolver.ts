@@ -67,7 +67,7 @@ export class OrdersResolver {
   }
 
   @Mutation(() => EditOrderOutput)
-  @Roles('Any')
+  @Roles('Owner', 'Delivery')
   async editOrder(
     @Args('input') editOrderInput: EditOrderInput,
     @CurrentUser() user: UserEntity,

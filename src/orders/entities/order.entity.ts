@@ -62,6 +62,9 @@ registerEnumType(OrderStatus, {
     Pending: {
       description: '주문 받을지 안 받을지 보류 중',
     },
+    Reject: {
+      description: 'Owner가 주문 거절',
+    },
     Cooking: {
       description: '요리하는 중',
     },

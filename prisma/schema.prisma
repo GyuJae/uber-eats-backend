@@ -115,6 +115,7 @@ model Order {
 
 enum OrderStatus {
   Pending
+  Reject
   Cooking
   Cooked
   PickedUp

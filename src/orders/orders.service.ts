@@ -505,6 +505,12 @@ export class OrdersService {
           error: 'This order id does not exist.',
         };
       }
+      if (order.status !== OrderStatus.Cooked) {
+        return {
+          ok: false,
+          error: 'This is not cooked order.',
+        };
+      }
       if (order.driverId) {
         return {
           ok: false,
@@ -517,6 +523,7 @@ export class OrdersService {
         },
         data: {
           driverId: driver.id,
+          status: OrderStatus.PickedUp,
         },
         include: {
           restaurant: {

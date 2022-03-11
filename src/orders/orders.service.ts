@@ -259,6 +259,7 @@ export class OrdersService {
         const orders = await this.prismaService.order.findMany({
           where: {
             driverId: user.id,
+            ...(status && { status }),
           },
           include: {
             restaurant: true,
